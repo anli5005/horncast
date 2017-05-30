@@ -4,17 +4,40 @@
     <meta charset="utf-8">
     <title>Horncast</title>
     <script>
+      var applicationId = "5B171C4A";
+
+      window['__onGCastApiAvailable'] = function(isAvailable) {
+        if (isAvailable) {
+          initCastApi();
+        }
+      };
+
+      function initCastApi() {
+        window.cast.framework.CastContext.getInstance().setOptions({
+          receiverApplicationId: applicationId,
+          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+        });
+      };
+
       var audio;
       function airhorn() {
-        if (audio) {
-          audio.pause();
+        var session = window.cast.framework.CastContext.getInstance().getCurrentSession();
+        if (session && session.getCastDevice()) {
+          session.sendMessage("horncast", "airhorn");
+        } else {
+          if (audio) {
+            audio.pause();
+          }
+          audio = new Audio("airhorn.mp3");
+          audio.play();
         }
-        audio = new Audio("airhorn.mp3");
-        audio.play();
       }
     </script>
+    <script type="text/javascript"
+        src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
   </head>
   <body style="background-color: rgb(236, 224, 164); display: flex; justify-content: center; align-items: center; margin: 0; padding: 0; height: 100%;">
     <img src="http://i0.kym-cdn.com/entries/icons/original/000/017/061/air_horn.png" style="display: block;" onclick="airhorn()" />
+    <button is="google-cast-button" style="position: fixed; top: 1em; right: 1em; width: 48px; height: 48px;">Cast</button>
   </body>
 </html>
